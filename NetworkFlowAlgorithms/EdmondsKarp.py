@@ -1,7 +1,7 @@
 """
-Implements Ford-Fulkerson algorithm to find maximum flow in a network
-The time complexity is O(VF), 
-V being the number of vertices and F the maximum flow
+Implements Edmonds-Karp algorithm to find maximum flow in a network
+The time complexity is O(VE^2), 
+V being the number of vertices and E the number of edges
 """
 
 INF = 1e10
@@ -12,7 +12,7 @@ class Edge:
         self.end = end 
         self.capacity = capacity 
         self.flow = 0 
-        self.residual = -1 # Edge object
+        self.residual : Edge = -1
 
     def is_residual(self):
         return self.capacity == 0
@@ -23,7 +23,7 @@ class Edge:
     def augment(self, bottleneck):
         self.flow += bottleneck
         self.residual.flow -= bottleneck
-
+        
 class NetworkFlowSolver:
     def __init__(self, n, s, t):
         self.n = n
@@ -62,31 +62,53 @@ class NetworkFlowSolver:
         if self.solved: return 
         self.solved = True
         self.solve()
-
+        
     def solve(self):
-        f = self.dfs(self.s, INF)
-        while f != 0:
-            self.max_flow += f
+        flow = -1
+        while flow != 0:
             self.visited_token += 1
-            f = self.dfs(self.s, INF)
-
-    def dfs(self, node, flow):
-        if node == self.t: 
-            return flow # reached sink
-
+            flow = self.bfs()
+            self.max_flow += flow
+            
+    def visit(self, node):
         self.visited[node] = self.visited_token
-        edges = self.graph[node]
-        for edge in edges:
-            if edge.get_remaining_capacity() > 0 and self.visited[edge.end] != self.visited_token:
-                bottleneck = self.dfs(edge.end, min(edge.get_remaining_capacity(), flow))
-
-                # Reached sink
-                if bottleneck > 0:
-                    edge.augment(bottleneck)
-                    return bottleneck
-
-        return 0
-
+        
+    def is_visited(self, node):
+        return self.visited[node] == self.visited_token
+    
+    def bfs(self):
+        q = [self.s] # Queue
+        self.visit(self.s)
+        
+        prev = {}
+        while len(q) != 0:
+            node = q.pop(0) 
+            if node == self.t: break
+            
+            for edge in self.graph[node]:
+                cap = edge.get_remaining_capacity()
+                if cap > 0 and not self.is_visited(edge.end):
+                    self.visit(edge.end)
+                    prev[edge.end] = edge
+                    q.append(edge.end)
+                    
+        if self.t not in prev: return 0 # Sink node is not reachable
+        
+        bottleNeck = INF
+        node = self.t
+        while node in prev:
+            edge = prev[node]
+            bottleNeck = min(bottleNeck, edge.get_remaining_capacity())
+            node = edge.start
+            
+        node = self.t
+        while node in prev:
+            edge = prev[node]
+            edge.augment(bottleNeck)
+            node = edge.start
+            
+        return bottleNeck
+     
 def main():
     n, m, s, t = map(int, input().split())
     solver = NetworkFlowSolver(n, s, t)
@@ -97,4 +119,4 @@ def main():
     print(solver.get_max_flow())
 
 if __name__ == "__main__":
-    main()
+    main()    
