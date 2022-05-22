@@ -122,17 +122,4 @@ class NetworkFlowSolver:
                 node = self.prevnode[node]
                 
         self.max_flow = maximum_flow
-        self.min_cost = minimum_cost
-    
-def main():
-    n, m, s, t = map(int, input().split())
-    solver = NetworkFlowSolver(n, s, t)
-    for _ in range(m):
-       u, v, c, w = map(int, input().split())
-       solver.add_edge(u, v, c, w)
-
-    ans = solver.solve()
-    print(ans[0], ans[1])
-                
-if __name__ == "__main__":
-    main()    
+        self.min_cost = minimum_cost 
