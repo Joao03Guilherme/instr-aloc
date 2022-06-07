@@ -5,7 +5,7 @@ A implementação é feita com o algoritmo de Ford-Fulkerson
 - Não contempla a escala de -1 a 2 de preferências
 """
 
-from NetworkFlow import FordFulkersonNetworkFlowSolver
+from NetworkFlow import EdmondsKarpNetworkFlowSolver
 INF = 1e10
 
 class Instructor:
@@ -36,7 +36,7 @@ def dummy_values():
 
 def build_bipartite_graph(instr_list, course_list, preferences, tight : bool):
     n = len(instr_list) + len(course_list) + 2 # Add two vertices for source and sink
-    solver = FordFulkersonNetworkFlowSolver(n, n-1, n-2)
+    solver = EdmondsKarpNetworkFlowSolver(n, n-1, n-2)
     
     id = 0 
     for course in course_list:
