@@ -1,4 +1,9 @@
-# Adapted from: https://github.com/meysamaghighi/Kattis/blob/master/Min%20cost%20max%20flow/b.cpp
+"""
+Implements a min cost flow algorithm
+- Adapted from: https://github.com/meysamaghighi/Kattis/blob/master/Min%20cost%20max%20flow/b.cpp
+- Time complexity is O(E^2*VlogV)
+- Based on Successive Shortest Path Algorithm with Dijkstra
+"""
 INF = 1e9
 
 class NetworkFlowSolver:
@@ -31,10 +36,6 @@ class NetworkFlowSolver:
     def add_edge(self, u, v, c, w):
         self.capacity[u][v] = c
         self.cost[u][v] = w 
-        
-    def get_graph(self):
-        self.execute()
-        return self.flow 
     
     def get_max_flow(self):
         self.execute()

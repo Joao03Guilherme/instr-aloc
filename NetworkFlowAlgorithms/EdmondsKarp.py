@@ -1,7 +1,7 @@
 """
 Implements Edmonds-Karp algorithm to find maximum flow in a network
-The time complexity is O(VE^2), 
-V being the number of vertices and E the number of edges
+The time complexity is O(min(E*F, VE^2)), 
+V being the number of vertices, F the maximum flow, and E the number of edges
 """
 
 INF = 1e10

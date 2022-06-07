@@ -1,7 +1,7 @@
 """
 Implements Ford-Fulkerson algorithm to find maximum flow in a network
-The time complexity is O(VF), 
-V being the number of vertices and F the maximum flow
+The time complexity is O(E*F), 
+E being the number of edges and F the maximum flow
 """
 
 INF = 1e10

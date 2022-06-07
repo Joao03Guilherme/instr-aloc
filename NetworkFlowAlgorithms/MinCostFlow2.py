@@ -1,11 +1,16 @@
 """
-Implements a min cost flow algorithm 
-- Time complexity is O(min(E^2*V*logV, E*logV*FLOW))
+Implements a (faster than version 1) min cost flow algorithm 
+- Time complexity is O(min(E^2*V*logV, E*logV*F))
 - Adapted from: https://sites.google.com/site/indy256/algo/min_cost_flow_pot
+- Accepted in https://open.kattis.com/problems/mincostmaxflow
 """
 
 from queue import PriorityQueue
 INF = 1e9
+
+def memset(container, size, val):
+        for i in range(size):
+            container[i] = val
 
 class Edge:
     def __init__(self, end, capacity, cost, rev):
@@ -59,10 +64,6 @@ class NetworkFlowSolver:
         self.solved = True 
         self.solve()
             
-    def memset(self, container, size, val):
-        for i in range(size):
-            container[i] = val
-            
     def add_edge(self, start, end, capacity, cost):
         self.graph[start].append(Edge(end, capacity, cost, len(self.graph[end])))
         self.graph[end].append(Edge(start, 0, -cost, len(self.graph[start]) - 1))
@@ -73,11 +74,11 @@ class NetworkFlowSolver:
             pq = PriorityQueue()
             pq.put(self.s)
             
-            self.memset(self.prio, self.n, INF)
+            memset(self.prio, self.n, INF)
             self.prio[self.s] = 0
             
             finished = {}
-            self.memset(finished, self.n, False)
+            memset(finished, self.n, False)
             
             self.curflow[self.s] = INF
             while not finished[self.t] and not pq.empty():
@@ -131,7 +132,7 @@ def main():
        u, v, c, w = map(int, input().split())
        solver.add_edge(u, v, c, w)
 
-    ans = solver.solve()
+    ans = solver.get_minimum_cost(), solver.get_maximum_flow()
     print(ans[0], ans[1])
                 
 if __name__ == "__main__":
