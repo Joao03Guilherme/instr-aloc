@@ -124,7 +124,7 @@ class NetworkFlowSolver:
                 
         self.max_flow = maximum_flow
         self.min_cost = minimum_cost
-    
+     
 def main():
     n, m, s, t = map(int, input().split())
     solver = NetworkFlowSolver(n, s, t)
