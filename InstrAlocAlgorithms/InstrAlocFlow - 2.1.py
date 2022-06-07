@@ -18,7 +18,7 @@ class Course:
 def dummy_values():
     instructors = ["A", "B", "C", "D", "E"]
     courses = [("X", 1), ("Y", 2), ("Z", 1)]
-    preferences = [
+    preferences = [ 
         [-1,  0, -1],
         [ 2, -1, -1],
         [-1,  2,  1],
