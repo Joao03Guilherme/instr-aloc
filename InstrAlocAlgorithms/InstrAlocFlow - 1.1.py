@@ -1,6 +1,6 @@
 """
 ALgoritmo de alocação baseado no fluxo de uma rede
-A implementação é feita com o algoritmo de Ford-Fulkerson
+A implementação é feita com o algoritmo de Edmonds-Karp
 - Não contempla a possibilidade de um curso não abrir
 - Não contempla a escala de -1 a 2 de preferências
 """
