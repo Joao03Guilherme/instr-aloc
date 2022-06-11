@@ -76,11 +76,16 @@ def main():
             for edge in graph[i]:
                 if edge.flow > 0:
                     course = ids[edge.end]
-                    print(f"Instructor: {instructor.name} | Course: {course.name}")
+                    
                     instructor.allocated = True
                     instructor.course = course 
                     course.allocated_instructors.append(instructor)
                     break
+                
+    for course in course_list:
+        print(f"Course: {course.name} | Instructors: {len(course.allocated_instructors)}/{course.min_instructors}")
+        for instructor in course.allocated_instructors:
+            print(f"--> {instructor.name}")
                   
 if __name__ == "__main__":
     main()
