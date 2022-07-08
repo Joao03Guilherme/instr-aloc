@@ -1,5 +1,12 @@
 from NetworkFlow import FastMinCostNetworkFlowSolver
+import pandas as pd 
+import os
 INF = 1e10
+
+# Changing python running directory
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
 
 class Instructor:
     def __init__(self, name, id):
@@ -15,16 +22,15 @@ class Course:
         self.id = id
         self.allocated_instructors = []
 
-def dummy_values():
-    instructors = ["A", "B", "C", "D", "E"]
-    courses = [("X", 1), ("Y", 2), ("Z", 1)]
-    preferences = [ 
-        [-1,  0, -1],
-        [ 2, -1, -1],
-        [-1,  2,  1],
-        [-1,  2, -1],
-        [ 2,  1,  0]
-    ]
+def import_data():
+    df = pd.read_excel("data.xlsx") 
+    preferences = df.iloc[:, 5:-3].fillna(-1).values.astype(int)
+    instructors = df["Nome"].values
+    courses_names = df.columns[5:-3].values
+
+    courses = {}
+    for course_name in courses_names:
+        courses[course_name] = 5
 
     return instructors, courses, preferences
 
@@ -49,11 +55,11 @@ def build_bipartite_graph(instr_list, course_list, preferences, tight : bool):
     return solver
      
 def main():
-    instructors, courses, preferences = dummy_values()
+    instructors, courses, preferences = import_data()
     instr_list, course_list, ids = [], [], {}
     
     id = 0 
-    for name, min_number_instructors in courses:
+    for name, min_number_instructors in courses.items():
         course = Course(name, id, min_number_instructors)
         ids[id] = course
         course_list.append(course)
