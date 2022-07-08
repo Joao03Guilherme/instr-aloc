@@ -25,9 +25,9 @@ class Course:
 
 def import_data():
     df = pd.read_excel("data.xlsx") 
-    preferences = df.iloc[:, 5:-3].fillna(-1).values.astype(int)  # [5:-3] depends on the Excel format
+    preferences = df.iloc[:, 5:-4].fillna(-1).values.astype(int)  # [5:-3] depends on the Excel format
     instructors = df["Nome"].values
-    courses_names = df.columns[5:-3].values
+    courses_names = df.columns[5:-4].values
 
     # Add minimum staff per course
     courses = {}
@@ -52,7 +52,7 @@ def output_data(course_list, course, instructor):
     for course in course_list:
         if len(course.allocated_instructors) >= min_instructors_per_course:
             for instructor in course.allocated_instructors:
-                output_data.append({course.name: instructor.name})
+                output_data.append([course.name, instructor.name])
     df = pd.DataFrame(output_data)
     
     print(df)
