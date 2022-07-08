@@ -10,9 +10,10 @@ dname = os.path.dirname(abspath)
 os.chdir(dname)
 
 class Instructor:
-    def __init__(self, name, id):
+    def __init__(self, name, id, email):
         self.name = name
         self.id = id
+        self.email = email
         self.allocated = False
         self.course = None 
         
@@ -25,8 +26,8 @@ class Course:
 
 def import_data():
     df = pd.read_excel("data.xlsx") 
-    preferences = df.iloc[:, 5:-4].fillna(-1).values.astype(int)  # [5:-3] depends on the Excel format
-    instructors = df["Nome"].values
+    preferences = df.iloc[:, 5:-4].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
+    instructors = df[["Nome","Email"]].values
     courses_names = df.columns[5:-4].values
 
     # Add minimum staff per course
@@ -52,10 +53,10 @@ def output_data(course_list, course, instructor):
     for course in course_list:
         if len(course.allocated_instructors) >= min_instructors_per_course:
             for instructor in course.allocated_instructors:
-                output_data.append([course.name, instructor.name])
+                output_data.append([course.name, instructor.name, instructor.email])
     df = pd.DataFrame(output_data)
+    df.columns = ["Curso", "Nome", "Email"]
     
-    print(df)
     df.to_excel(filename)
     
 
@@ -90,8 +91,8 @@ def main():
         course_list.append(course)
         id += 1
     
-    for i, name in enumerate(instructors):
-        instructor = Instructor(name, id)
+    for i, (name, email) in enumerate(instructors):
+        instructor = Instructor(name, id, email)
         ids[id] = instructor         
         instr_list.append(instructor)   
         id += 1
