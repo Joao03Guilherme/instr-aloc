@@ -1,7 +1,8 @@
-from NetworkFlow import FastMinCostNetworkFlowSolver
+from network_flow_algorithms import FastMinCostNetworkFlowSolver
+from functools import cmp_to_key
 import pandas as pd 
 import os
-INF = 1e10
+INF = 1e8
 MIN_STAFF = 5
 
 # Changing python running directory
@@ -22,6 +23,7 @@ class Course:
         self.name = name
         self.min_instructors = min_instructors
         self.id = id
+        self.number_of_allocable_instructors = 0
         self.allocated_instructors = []
 
 def import_data():
@@ -44,23 +46,32 @@ def output_data(course_list, course, instructor):
         course_list (list): List of courses, each course is an object.
         course (object): Course information.
         instructor (object): Instructor information.
-
     """
     filename = "output.xlsx"
-    min_instructors_per_course = MIN_STAFF * .70
+    min_instructors_per_course = MIN_STAFF * .70 
     
     output_data = []
     for course in course_list:
         if len(course.allocated_instructors) >= min_instructors_per_course:
             for instructor in course.allocated_instructors:
                 output_data.append([course.name, instructor.name, instructor.email])
+    
+    print(len(output_data))
     df = pd.DataFrame(output_data)
     df.columns = ["Curso", "Nome", "Email"]
     
     df.to_excel(filename)
     
 
-def build_bipartite_graph(instr_list, course_list, preferences, tight : bool):
+def build_bipartite_graph(instr_list, course_list, preferences, tight):
+    """Returns a flow network with instructors and courses
+    
+    Args:
+        instr_list (list): List of instructors, each instructor is an object
+        course_list (list): List of courses, each course is an object.
+        preferences (list): List of lists, preferences[i][j] represents preference of ith instructor for the jth course
+        tight (bool): True if on first pass of algorithm, else False
+    """
     n = len(instr_list) + len(course_list) + 2 # Add two vertices for source and sink
     solver = FastMinCostNetworkFlowSolver(n, n-1, n-2)
     
@@ -79,6 +90,15 @@ def build_bipartite_graph(instr_list, course_list, preferences, tight : bool):
         id += 1
         
     return solver
+
+def compare_courses(course1, course2):
+    """Comparator function used to sort courses by decreasing order of allocable instructors
+    """
+    if course1.number_of_allocable_instructors > course2.number_of_allocable_instructors:
+        return -1 
+    elif course1.number_of_allocable_instructors < course2.number_of_allocable_instructors:
+        return 1
+    return 0
      
 def main():
     instructors, courses, preferences = import_data()
@@ -96,7 +116,13 @@ def main():
         ids[id] = instructor         
         instr_list.append(instructor)   
         id += 1
+
+        for j, preference in enumerate(preferences[i]):
+            if preference != -1:
+                ids[j].number_of_allocable_instructors += 1
     
+    # course_list = sorted(course_list, key=cmp_to_key(compare_courses)) # Make greedy choice of allocating first courses with many preferences
+   
     # First pass is to guarantee minimum number of instructors
     # Second pass is to allocate remaining instructors
     for p in range(2):
@@ -113,11 +139,6 @@ def main():
                     instructor.course = course 
                     course.allocated_instructors.append(instructor)
                     break
-                
-    for course in course_list:
-        print(f"Course: {course.name} | Instructors: {len(course.allocated_instructors)}/{course.min_instructors}")
-        for instructor in course.allocated_instructors:
-            print(f"--> {instructor.name}")
             
     output_data(course_list, course, instructor)
                   
