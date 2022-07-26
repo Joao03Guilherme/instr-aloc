@@ -1,5 +1,5 @@
 """
-This file has all network flow algorithm classes
+This file contains all network flow algorithms
 """
 
 from queue import PriorityQueue
