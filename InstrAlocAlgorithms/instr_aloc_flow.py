@@ -23,6 +23,7 @@ class Course:
         self.min_instructors = min_instructors
         self.id = id
         self.allocated_instructors = []
+        self.can_open = True
 
 def import_data():
     df = pd.read_excel("data.xlsx") 
@@ -60,7 +61,7 @@ def output_data(course_list, course, instructor):
     df.to_excel(filename)
     
 
-def build_bipartite_graph(instr_list, course_list, preferences, tight):
+def build_bipartite_graph(instr_list, course_list, preferences, id_to_course_or_instructor, tight):
     """Returns a flow network with instructors and courses
     
     Args:
@@ -82,46 +83,58 @@ def build_bipartite_graph(instr_list, course_list, preferences, tight):
         solver.add_edge(n-1, id, 1, 0) # Add edge from source to instructor
         if not instructor.allocated:
             for j, preference in enumerate(preferences[i]):
-                if preference != -1:
+                if id_to_course_or_instructor[j].can_open and preference != -1:
                     solver.add_edge(id, j, 1, 2 - preference) # Minimize cost 
         id += 1
         
     return solver
+
+def run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, tight):
+    solver = build_bipartite_graph(instr_list, course_list, preferences, id_to_course_or_instructor, tight)
+    graph = solver.get_graph()
+    
+    for i in range(len(course_list), len(course_list) + len(instr_list)):
+        instructor = id_to_course_or_instructor[i] 
+        for edge in graph[i]:
+            if edge.flow > 0:
+                course = id_to_course_or_instructor[edge.end]
+                
+                instructor.allocated = True
+                instructor.course = course 
+                course.allocated_instructors.append(instructor)
+                break
      
 def main():
     instructors, courses, preferences = import_data()
-    instr_list, course_list, ids = [], [], {}
+    instr_list, course_list, id_to_course_or_instructor = [], [], {}
     
     id = 0 
     for name, min_number_instructors in courses.items():
         course = Course(name, id, min_number_instructors)
-        ids[id] = course
+        id_to_course_or_instructor[id] = course
         course_list.append(course)
         id += 1
     
     for i, (name, email) in enumerate(instructors):
         instructor = Instructor(name, id, email)
-        ids[id] = instructor         
+        id_to_course_or_instructor[id] = instructor         
         instr_list.append(instructor)   
         id += 1
    
     # First pass is to guarantee minimum number of instructors
-    # Second pass is to allocate remaining instructors
-    for p in range(2):
-        solver = build_bipartite_graph(instr_list, course_list, preferences, 1 - p)
-        graph = solver.get_graph()
-        
-        for i in range(len(course_list), len(course_list) + len(instr_list)):
-            instructor = ids[i] 
-            for edge in graph[i]:
-                if edge.flow > 0:
-                    course = ids[edge.end]
-                    
-                    instructor.allocated = True
-                    instructor.course = course 
-                    course.allocated_instructors.append(instructor)
-                    break
+    run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
             
+    min_instructors_per_course = MIN_STAFF * .70
+    for course in course_list:
+        if len(course.allocated_instructors) < min_instructors_per_course:
+            course.can_open = False 
+            for instructor in course.allocated_instructors:
+                instructor.allocated = False 
+                instructor.course = None
+
+            run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
+
+    run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, False)
     output_data(course_list, course, instructor)
                   
 if __name__ == "__main__":
