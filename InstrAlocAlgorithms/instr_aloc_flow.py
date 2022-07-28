@@ -23,7 +23,6 @@ class Course:
         self.name = name
         self.min_instructors = min_instructors
         self.id = id
-        self.number_of_allocable_instructors = 0
         self.allocated_instructors = []
 
 def import_data():
@@ -56,7 +55,6 @@ def output_data(course_list, course, instructor):
             for instructor in course.allocated_instructors:
                 output_data.append([course.name, instructor.name, instructor.email])
     
-    print(len(output_data))
     df = pd.DataFrame(output_data)
     df.columns = ["Curso", "Nome", "Email"]
     
@@ -90,15 +88,6 @@ def build_bipartite_graph(instr_list, course_list, preferences, tight):
         id += 1
         
     return solver
-
-def compare_courses(course1, course2):
-    """Comparator function used to sort courses by decreasing order of allocable instructors
-    """
-    if course1.number_of_allocable_instructors > course2.number_of_allocable_instructors:
-        return -1 
-    elif course1.number_of_allocable_instructors < course2.number_of_allocable_instructors:
-        return 1
-    return 0
      
 def main():
     instructors, courses, preferences = import_data()
@@ -116,12 +105,6 @@ def main():
         ids[id] = instructor         
         instr_list.append(instructor)   
         id += 1
-
-        for j, preference in enumerate(preferences[i]):
-            if preference != -1:
-                ids[j].number_of_allocable_instructors += 1
-    
-    # course_list = sorted(course_list, key=cmp_to_key(compare_courses)) # Make greedy choice of allocating first courses with many preferences
    
     # First pass is to guarantee minimum number of instructors
     # Second pass is to allocate remaining instructors
