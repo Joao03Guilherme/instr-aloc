@@ -1,8 +1,11 @@
 from network_flow_algorithms import FastMinCostNetworkFlowSolver
 import pandas as pd 
 import os
+
 INF = 1e8
-MIN_STAFF = 5
+MIN_STAFF = 10
+INPUT_OUTPUT_FILENAME="data.xlsx"
+OUTPUT_FILENAME = "output.xlsx"
 
 # Changing python running directory
 abspath = os.path.abspath(__file__)
@@ -26,10 +29,20 @@ class Course:
         self.can_open = True
 
 def import_data():
-    df = pd.read_excel("data.xlsx") 
-    preferences = df.iloc[:, 5:-4].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
+    """Import data.
+
+    It expects input data to have 5 initial columns (index, timestamp, name, email, phone, availability) and then all the preferences.
+
+    Returns:
+        instructors (pd.DataFrame): instrutors name and email.
+        courses (pd.DataFrame): list of courses.
+        preferences (pd.DataFrame): instrutors' preferences.
+
+    """
+    df = pd.read_excel(INPUT_OUTPUT_FILENAME) 
+    preferences = df.iloc[:, 6:].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
     instructors = df[["Nome","Email"]].values
-    courses_names = df.columns[5:-4].values
+    courses_names = df.columns[6:].values
 
     # Add minimum staff per course
     courses = {}
@@ -38,27 +51,28 @@ def import_data():
 
     return instructors, courses, preferences
 
-def output_data(course_list, course, instructor):
+def output_data(course_list, instr_list, course, instructor):
     """Outputs data to a 'beautiful' Excel file.
 
     Args:
         course_list (list): List of courses, each course is an object.
+        instr_list (list): List of instructors.
         course (object): Course information.
         instructor (object): Instructor information.
     """
-    filename = "output.xlsx"
-    min_instructors_per_course = MIN_STAFF * .70 
-    
     output_data = []
     for course in course_list:
-        if len(course.allocated_instructors) >= min_instructors_per_course:
+        if len(course.allocated_instructors) >= MIN_STAFF:
             for instructor in course.allocated_instructors:
                 output_data.append([course.name, instructor.name, instructor.email])
+    for instructor in instr_list:
+        if instructor.allocated == False:
+            output_data.append(["Sem curso", instructor.name, instructor.email])
     
     df = pd.DataFrame(output_data)
     df.columns = ["Curso", "Nome", "Email"]
     
-    df.to_excel(filename)
+    df.to_excel(OUTPUT_FILENAME)
     
 
 def build_bipartite_graph(instr_list, course_list, preferences, id_to_course_or_instructor, tight):
@@ -124,9 +138,8 @@ def main():
     # First pass is to guarantee minimum number of instructors
     run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
             
-    min_instructors_per_course = MIN_STAFF * .70
     for course in course_list:
-        if len(course.allocated_instructors) < min_instructors_per_course:
+        if len(course.allocated_instructors) < MIN_STAFF:
             course.can_open = False 
             for instructor in course.allocated_instructors:
                 instructor.allocated = False 
@@ -135,7 +148,7 @@ def main():
             run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
 
     run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, False)
-    output_data(course_list, course, instructor)
+    output_data(course_list, instr_list, course, instructor)
                   
 if __name__ == "__main__":
     main()
