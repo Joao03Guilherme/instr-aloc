@@ -178,7 +178,7 @@ class EdmondsKarpNetworkFlowSolver:
             
         return bottleNeck
     
-class MinCostNetworkFlowSolver:
+class FastMinCostNetworkFlowSolver:
     def __init__(self, n, s, t):
         self.n = n
         self.s = s 

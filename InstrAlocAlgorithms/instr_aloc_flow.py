@@ -1,8 +1,10 @@
 from network_flow_algorithms import FastMinCostNetworkFlowSolver
+from random import shuffle
 import pandas as pd 
 import os
-INF = 1e8
+INF = 999
 MIN_STAFF = 5
+MAX_STAFF = 10
 
 # Changing python running directory
 abspath = os.path.abspath(__file__)
@@ -18,9 +20,10 @@ class Instructor:
         self.course = None 
         
 class Course:
-    def __init__(self, name, id, min_instructors):
+    def __init__(self, name, id, min_staff, max_staff):
         self.name = name
-        self.min_instructors = min_instructors
+        self.min_staff = min_staff
+        self.max_staff = max_staff
         self.id = id
         self.allocated_instructors = []
         self.can_open = True
@@ -32,11 +35,12 @@ def import_data():
     courses_names = df.columns[5:-4].values
 
     # Add minimum staff per course
-    courses = {}
+    staff_per_course = {}
     for course_name in courses_names:
-        courses[course_name] = MIN_STAFF
+        staff_per_course[course_name] = (MIN_STAFF, MAX_STAFF) # Can be dynamic (e.g imported from the excel file)
+        
 
-    return instructors, courses, preferences
+    return instructors, staff_per_course, preferences
 
 def output_data(course_list, course, instructor):
     """Outputs data to a 'beautiful' Excel file.
@@ -47,11 +51,10 @@ def output_data(course_list, course, instructor):
         instructor (object): Instructor information.
     """
     filename = "output.xlsx"
-    min_instructors_per_course = MIN_STAFF * .70 
     
     output_data = []
     for course in course_list:
-        if len(course.allocated_instructors) >= min_instructors_per_course:
+        if len(course.allocated_instructors) >= MIN_STAFF:
             for instructor in course.allocated_instructors:
                 output_data.append([course.name, instructor.name, instructor.email])
     
@@ -68,33 +71,44 @@ def build_bipartite_graph(instr_list, course_list, preferences, id_to_course_or_
         instr_list (list): List of instructors, each instructor is an object
         course_list (list): List of courses, each course is an object.
         preferences (list): List of lists, preferences[i][j] represents preference of ith instructor for the jth course
-        tight (bool): True if on first pass of algorithm, else False
+        id_to_course_or_instructor (dict): maps vertex id to instructor or course
+        tight (bool): True if the algorithm is trying to guarantee the minimum number of instructors per course
     """
     n = len(instr_list) + len(course_list) + 2 # Add two vertices for source and sink
     solver = FastMinCostNetworkFlowSolver(n, n-1, n-2)
-    
-    id = 0 
+
     for course in course_list:
-        min_number_instructors = course.min_instructors if tight else INF
-        solver.add_edge(id, n-2, min_number_instructors, 0) # Add edge from course to sink
-        id += 1
+        if course.can_open:
+            n_of_allocated_instructors = len(course.allocated_instructors)
+            min_staff = course.min_staff - n_of_allocated_instructors if tight else course.max_staff - n_of_allocated_instructors
+            solver.add_edge(course.id, solver.t, min_staff, 0) # Add edge from course to sink
     
     for i, instructor in enumerate(instr_list):    
-        solver.add_edge(n-1, id, 1, 0) # Add edge from source to instructor
         if not instructor.allocated:
+            solver.add_edge(solver.s, instructor.id, 1, 0) # Add edge from source to instructor
             for j, preference in enumerate(preferences[i]):
-                if id_to_course_or_instructor[j].can_open and preference != -1:
-                    solver.add_edge(id, j, 1, 2 - preference) # Minimize cost 
-        id += 1
-        
+                course = id_to_course_or_instructor[j]
+                if course.can_open and preference != -1:
+                    solver.add_edge(instructor.id, course.id, 1, 2 - preference) # Minimize cost 
+
     return solver
 
 def run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, tight):
+    """Runs the allocation algorithm
+
+    Args:
+        instr_list (list): List of instructor objects
+        course_list (list): List of courses, each course is an object.
+        preferences (list): List of lists, preferences[i][j] represents preference of ith instructor for the jth course
+        id_to_course_or_instructor (dict): maps vertex id to instructor or course
+        tight (bool): True if the algorithm is trying to guarantee the minimum number of instructors per course
+    """
     solver = build_bipartite_graph(instr_list, course_list, preferences, id_to_course_or_instructor, tight)
     graph = solver.get_graph()
     
     for i in range(len(course_list), len(course_list) + len(instr_list)):
         instructor = id_to_course_or_instructor[i] 
+        shuffle(graph[i]) # Assure that instructor distribution across courses is uniform
         for edge in graph[i]:
             if edge.flow > 0:
                 course = id_to_course_or_instructor[edge.end]
@@ -105,17 +119,17 @@ def run_solver(instr_list, course_list, preferences, id_to_course_or_instructor,
                 break
      
 def main():
-    instructors, courses, preferences = import_data()
+    instructors, staff_per_course, preferences = import_data()
     instr_list, course_list, id_to_course_or_instructor = [], [], {}
     
     id = 0 
-    for name, min_number_instructors in courses.items():
-        course = Course(name, id, min_number_instructors)
+    for name, (min_staff, max_staff) in staff_per_course.items():
+        course = Course(name, id, min_staff, max_staff)
         id_to_course_or_instructor[id] = course
         course_list.append(course)
         id += 1
     
-    for i, (name, email) in enumerate(instructors):
+    for (name, email) in instructors:
         instructor = Instructor(name, id, email)
         id_to_course_or_instructor[id] = instructor         
         instr_list.append(instructor)   
@@ -123,10 +137,9 @@ def main():
    
     # First pass is to guarantee minimum number of instructors
     run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
-            
-    min_instructors_per_course = MIN_STAFF * .70
+
     for course in course_list:
-        if len(course.allocated_instructors) < min_instructors_per_course:
+        if len(course.allocated_instructors) < course.min_staff:
             course.can_open = False 
             for instructor in course.allocated_instructors:
                 instructor.allocated = False 
