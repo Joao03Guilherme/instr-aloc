@@ -1,10 +1,13 @@
 from network_flow_algorithms import FastMinCostNetworkFlowSolver
-from random import shuffle
 import pandas as pd 
 import os
+
 INF = 999
 MIN_STAFF = 5
 MAX_STAFF = 10
+
+INPUT_OUTPUT_FILENAME="data.xlsx"
+OUTPUT_FILENAME = "output.xlsx"
 
 # Changing python running directory
 abspath = os.path.abspath(__file__)
@@ -29,17 +32,26 @@ class Course:
         self.can_open = True
 
 def import_data():
-    df = pd.read_excel("data.xlsx") 
-    preferences = df.iloc[:, 5:-4].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
+    """Import data.
+
+        It expects input data to have 5 initial columns (index, timestamp, name, email, phone, availability) and then all the preferences.
+        
+        Returns:
+            instructors (pd.DataFrame): instrutors name and email.
+            courses (pd.DataFrame): list of courses.
+            preferences (pd.DataFrame): instrutors' preferences.
+    """
+
+    df = pd.read_excel(INPUT_OUTPUT_FILENAME) 
+    preferences = df.iloc[:, 6:].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
     instructors = df[["Nome","Email"]].values
-    courses_names = df.columns[5:-4].values
+    courses_names = df.columns[6:].values
 
     # Add minimum staff per course
     staff_per_course = {}
     for course_name in courses_names:
         staff_per_course[course_name] = (MIN_STAFF, MAX_STAFF) # Can be dynamic (e.g imported from the excel file)
         
-
     return instructors, staff_per_course, preferences
 
 def output_data(course_list, course, instructor):
@@ -108,7 +120,6 @@ def run_solver(instr_list, course_list, preferences, id_to_course_or_instructor,
     
     for i in range(len(course_list), len(course_list) + len(instr_list)):
         instructor = id_to_course_or_instructor[i] 
-        shuffle(graph[i]) # Assure that instructor distribution across courses is uniform
         for edge in graph[i]:
             if edge.flow > 0:
                 course = id_to_course_or_instructor[edge.end]
