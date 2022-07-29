@@ -4,7 +4,7 @@ import os
 
 INF = 999
 MIN_STAFF = 5
-MAX_STAFF = 20
+MAX_STAFF = 15
 
 INPUT_OUTPUT_FILENAME="data.xlsx"
 OUTPUT_FILENAME = "output.xlsx"
