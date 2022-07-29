@@ -33,15 +33,12 @@ class Course:
 
 def import_data():
     """Import data.
-
-        It expects input data to have 5 initial columns (index, timestamp, name, email, phone, availability) and then all the preferences.
-        
-        Returns:
-            instructors (pd.DataFrame): instrutors name and email.
-            courses (pd.DataFrame): list of courses.
-            preferences (pd.DataFrame): instrutors' preferences.
+    It expects input data to have 5 initial columns (index, timestamp, name, email, phone, availability) and then all the preferences.
+    Returns:
+        instructors (pd.DataFrame): instrutors name and email.
+        courses (pd.DataFrame): list of courses.
+        preferences (pd.DataFrame): instrutors' preferences.
     """
-
     df = pd.read_excel(INPUT_OUTPUT_FILENAME) 
     preferences = df.iloc[:, 6:].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
     instructors = df[["Nome","Email"]].values
@@ -54,26 +51,27 @@ def import_data():
         
     return instructors, staff_per_course, preferences
 
-def output_data(course_list, course, instructor):
+def output_data(course_list, instr_list, course, instructor):
     """Outputs data to a 'beautiful' Excel file.
-
     Args:
         course_list (list): List of courses, each course is an object.
+        instr_list (list): List of instructors.
         course (object): Course information.
         instructor (object): Instructor information.
     """
-    filename = "output.xlsx"
-    
     output_data = []
     for course in course_list:
         if len(course.allocated_instructors) >= MIN_STAFF:
             for instructor in course.allocated_instructors:
                 output_data.append([course.name, instructor.name, instructor.email])
+    for instructor in instr_list:
+        if instructor.allocated == False:
+            output_data.append(["Sem curso", instructor.name, instructor.email])
     
     df = pd.DataFrame(output_data)
     df.columns = ["Curso", "Nome", "Email"]
     
-    df.to_excel(filename)
+    df.to_excel(OUTPUT_FILENAME)
     
 
 def build_bipartite_graph(instr_list, course_list, preferences, id_to_course_or_instructor, tight):
