@@ -4,7 +4,7 @@ import os
 
 INF = 999
 MIN_STAFF = 5
-MAX_STAFF = 10
+MAX_STAFF = 20
 
 INPUT_OUTPUT_FILENAME="data.xlsx"
 OUTPUT_FILENAME = "output.xlsx"
@@ -85,21 +85,26 @@ def build_bipartite_graph(instr_list, course_list, preferences, id_to_course_or_
         tight (bool): True if the algorithm is trying to guarantee the minimum number of instructors per course
     """
     n = len(instr_list) + len(course_list) + 2 # Add two vertices for source and sink
-    solver = FastMinCostNetworkFlowSolver(n, n-1, n-2)
+    s, t = n - 1, n - 2
+    edges = []
 
     for course in course_list:
         if course.can_open:
             n_of_allocated_instructors = len(course.allocated_instructors)
             min_staff = course.min_staff - n_of_allocated_instructors if tight else course.max_staff - n_of_allocated_instructors
-            solver.add_edge(course.id, solver.t, min_staff, 0) # Add edge from course to sink
+            edges.append((course.id, t, min_staff, 0)) # Add edge from course to sink
     
     for i, instructor in enumerate(instr_list):    
         if not instructor.allocated:
-            solver.add_edge(solver.s, instructor.id, 1, 0) # Add edge from source to instructor
+            edges.append((s, instructor.id, 1, 0)) # Add edge from source to instructor
             for j, preference in enumerate(preferences[i]):
                 course = id_to_course_or_instructor[j]
                 if course.can_open and preference != -1:
-                    solver.add_edge(instructor.id, course.id, 1, 2 - preference) # Minimize cost 
+                    edges.append((instructor.id, course.id, 1, int(2 - preference))) # Minimize cost 
+
+    solver = FastMinCostNetworkFlowSolver(n, s, t)
+    for edge in edges:
+        solver.add_edge(*edge)
 
     return solver
 
@@ -129,7 +134,7 @@ def run_solver(instr_list, course_list, preferences, id_to_course_or_instructor,
      
 def main():
     instructors, staff_per_course, preferences = import_data()
-    instr_list, course_list, id_to_course_or_instructor = [], [], {}
+    instructor_list, course_list, id_to_course_or_instructor = [], [], {}
     
     id = 0 
     for name, (min_staff, max_staff) in staff_per_course.items():
@@ -141,11 +146,11 @@ def main():
     for (name, email) in instructors:
         instructor = Instructor(name, id, email)
         id_to_course_or_instructor[id] = instructor         
-        instr_list.append(instructor)   
+        instructor_list.append(instructor)   
         id += 1
    
     # First pass is to guarantee minimum number of instructors
-    run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
+    run_solver(instructor_list, course_list, preferences, id_to_course_or_instructor, True)
 
     for course in course_list:
         if len(course.allocated_instructors) < course.min_staff:
@@ -154,10 +159,10 @@ def main():
                 instructor.allocated = False 
                 instructor.course = None
 
-            run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
+            run_solver(instructor_list, course_list, preferences, id_to_course_or_instructor, True)
 
-    run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, False)
-    output_data(course_list, instr_list)
+    run_solver(instructor_list, course_list, preferences, id_to_course_or_instructor, False)
+    output_data(course_list, instructor_list)
                   
 if __name__ == "__main__":
     main()
