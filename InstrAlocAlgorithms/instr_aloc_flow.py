@@ -51,7 +51,7 @@ def import_data():
         
     return instructors, staff_per_course, preferences
 
-def output_data(course_list, instr_list, course, instructor):
+def output_data(course_list, instr_list):
     """Outputs data to a 'beautiful' Excel file.
     Args:
         course_list (list): List of courses, each course is an object.
@@ -157,7 +157,7 @@ def main():
             run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, True)
 
     run_solver(instr_list, course_list, preferences, id_to_course_or_instructor, False)
-    output_data(course_list, course, instructor)
+    output_data(course_list, instr_list)
                   
 if __name__ == "__main__":
     main()
