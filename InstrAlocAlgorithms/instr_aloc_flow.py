@@ -1,13 +1,13 @@
+from argparse import ArgumentError
 from network_flow_algorithms import FastMinCostNetworkFlowSolver
 import pandas as pd 
 import os
 
 INF = 999
-MIN_STAFF = 5
-MAX_STAFF = 15
 
 INPUT_OUTPUT_FILENAME="data.xlsx"
 OUTPUT_FILENAME = "output.xlsx"
+INPUT_COURSE_DATA_FILENAME = "course_data.xlsx"
 
 # Changing python running directory
 abspath = os.path.abspath(__file__)
@@ -33,23 +33,40 @@ class Course:
 
 def import_data():
     """Import data.
-    It expects input data to have 5 initial columns (index, timestamp, name, email, phone, availability) and then all the preferences.
+    It expects two excel files:
+        Staff Form data: input data to have 5 initial columns (index, timestamp, name, email, phone, availability) and then all the preferences.
+        Course Staff needs: input data to have 3 rows: course name, minimum staff and maximum staff.
     Returns:
         instructors (pd.DataFrame): instrutors name and email.
         courses (pd.DataFrame): list of courses.
         preferences (pd.DataFrame): instrutors' preferences.
     """
-    df = pd.read_excel(INPUT_OUTPUT_FILENAME) 
-    preferences = df.iloc[:, 6:].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
-    instructors = df[["Nome","Email"]].values
-    courses_names = df.columns[6:].values
+    df_staff_form = pd.read_excel(INPUT_OUTPUT_FILENAME) 
+    df_course_needs = pd.read_excel(INPUT_COURSE_DATA_FILENAME)
 
-    # Add minimum staff per course
+    preferences = df_staff_form.iloc[:, 6:].fillna(-1).values.astype(int)  # [X:-X] depends on the Excel format
+    instructors = df_staff_form[["Nome","Email"]].values
+    open_course_names = df_staff_form.columns[6:].values
+    
+    course_names = df_course_needs.columns[1:].values
+    course_min_staff = df_course_needs.iloc[0, 1:].values.astype(int)
+    course_max_staff = df_course_needs.iloc[1, 1:].values.astype(int)
+
+    print
+    # Load minimum and maximum staff per course
     staff_per_course = {}
-    for course_name in courses_names:
-        staff_per_course[course_name] = (MIN_STAFF, MAX_STAFF) # Can be dynamic (e.g imported from the excel file)
+    for i, course_name in enumerate(course_names):
+        if course_min_staff[i] > course_max_staff[i]:
+            raise ArgumentError # Min Staff must not be greater than max staff
+
+        staff_per_course[course_name] = (int(course_min_staff[i]), int(course_max_staff[i])) 
         
-    return instructors, staff_per_course, preferences
+    # Get data only for open courses
+    staff_per_open_course = {}
+    for course_name in open_course_names:
+        staff_per_open_course[course_name] = staff_per_course[course_name]
+
+    return instructors, staff_per_open_course, preferences
 
 def output_data(course_list, instr_list):
     """Outputs data to a 'beautiful' Excel file.
@@ -61,16 +78,16 @@ def output_data(course_list, instr_list):
     """
     output_data = []
     for course in course_list:
-        if len(course.allocated_instructors) >= MIN_STAFF:
+        if course.can_open:
             for instructor in course.allocated_instructors:
                 output_data.append([course.name, instructor.name, instructor.email])
+
     for instructor in instr_list:
-        if instructor.allocated == False:
+        if not instructor.allocated:
             output_data.append(["Sem curso", instructor.name, instructor.email])
     
     df = pd.DataFrame(output_data)
     df.columns = ["Curso", "Nome", "Email"]
-    
     df.to_excel(OUTPUT_FILENAME)
     
 
@@ -152,6 +169,7 @@ def main():
     # First pass is to guarantee minimum number of instructors
     run_solver(instructor_list, course_list, preferences, id_to_course_or_instructor, True)
 
+    # Iteratively remove courses with not enough instructors and re-run the algorithm
     for course in course_list:
         if len(course.allocated_instructors) < course.min_staff:
             course.can_open = False 
@@ -161,6 +179,7 @@ def main():
 
             run_solver(instructor_list, course_list, preferences, id_to_course_or_instructor, True)
 
+    # Last run to allocate remaining instructors
     run_solver(instructor_list, course_list, preferences, id_to_course_or_instructor, False)
     output_data(course_list, instructor_list)
                   
