@@ -1,11 +1,12 @@
 # instr-aloc
 Algoritmo de alocação de instrutores a cursos. \
-Faz uso de algoritmos de fluxo máximo em redes.
+Faz uso de algoritmos de fluxo máximo em redes. \
 A descrição da solução desenhada encontra-se [aqui](https://www.overleaf.com/read/cmsnhdyrpbrg).
 
 ## Organização
-* A pasta *NetworkFlowAlgorithms* contém apenas os algoritmos de fluxo em rede que servem de base para o algoritmo de alocação de instrutores. 
 * A pasta *InstrAlocAlgorithms* contém os ficheiros necessários para correr o algoritmo de alocação de instrutores. 
+
+* A pasta *NetworkFlowAlgorithms* contém apenas os algoritmos de fluxo em rede que servem de base para o algoritmo de alocação de instrutores. 
 
 ## Como executar?
 
