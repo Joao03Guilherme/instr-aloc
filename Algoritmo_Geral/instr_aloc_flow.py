@@ -52,7 +52,6 @@ def import_data():
     course_min_staff = df_course_needs.iloc[0, 1:].values.astype(int)
     course_max_staff = df_course_needs.iloc[1, 1:].values.astype(int)
 
-    print
     # Load minimum and maximum staff per course
     staff_per_course = {}
     for i, course_name in enumerate(course_names):
