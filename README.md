@@ -3,9 +3,10 @@ Algoritmo de alocação de instrutores a cursos. \
 Faz uso de algoritmos de fluxo máximo em redes. \
 A descrição da solução desenhada encontra-se [aqui](https://www.overleaf.com/read/cmsnhdyrpbrg).
 
-## Nota sobre o algoritmo geral e restrito
-O respositório contém duas versões do algoritmo. A versão geral é a que é efetivamente utilizada. \
-O algoritmo restrito não tem em consideração a escala de preferências de cada instrutor.
+## Nota sobre o algoritmo 
+O respositório contém duas versões do algoritmo. 
+* A versão *restrita* não tem em consideração uma escala de preferências, apenas considera a possibilidade de alocar, ou não, um instrutor a um curso. Esta versão é baseada [nesta implementação](https://github.com/Joao03Guilherme/Network-Flow-Algorithms/blob/master/EdmondsKarp.py) do algoritmo de *Edmonds-Karp*.
+* A versão *geral* considera uma escala de preferências, contemplando a possibilidade de um instrutor *preferir* um curso a outro. Esta versão é baseada [nesta implementação](https://github.com/Joao03Guilherme/Network-Flow-Algorithms/blob/master/MinCostFlow2.py) de um algoritmo de determinação de custo mínimo com fluxo máximo.
 
 ## Como executar?
 * Obter os ficheiros com: `git clone https://github.com/Joao03Guilherme/instr-aloc`
