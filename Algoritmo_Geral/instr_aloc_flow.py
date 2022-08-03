@@ -1,5 +1,5 @@
 from argparse import ArgumentError
-from Algoritmo_Restrito.network_flow_algorithm import FastMinCostNetworkFlowSolver
+from network_flow_algorithm import FastMinCostNetworkFlowSolver
 import pandas as pd 
 import os
 

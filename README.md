@@ -3,18 +3,13 @@ Algoritmo de alocação de instrutores a cursos. \
 Faz uso de algoritmos de fluxo máximo em redes. \
 A descrição da solução desenhada encontra-se [aqui](https://www.overleaf.com/read/cmsnhdyrpbrg).
 
-## Organização
-* A pasta *InstrAlocAlgorithms* contém os ficheiros necessários para correr o algoritmo de alocação de instrutores. 
-
-* A pasta *NetworkFlowAlgorithms* contém apenas os algoritmos de fluxo em rede que servem de base para o algoritmo de alocação de instrutores. 
+## Nota sobre o algoritmo geral e restrito
+O respositório contém duas versões do algoritmo. A versão geral é a que é efetivamente utilizada. \
+O algoritmo restrito não tem em consideração a escala de preferências de cada instrutor.
 
 ## Como executar?
-
-Para alocar instrutores a cursos, basta correr [este ficheiro](https://github.com/Joao03Guilherme/instr-aloc/blob/master/InstrAlocAlgorithms/instr_aloc_flow.py).
-
-**Pormenores:** 
-
-* Aquando da execução, [este ficheiro](https://github.com/Joao03Guilherme/instr-aloc/blob/master/InstrAlocAlgorithms/NetworkFlow.py) tem de estar na mesma pasta do ficheiro anterior.
-* A execução implica a existência de um ficheiro `data.xlsx` com a estrutura standard dos formulários After School. 
-  * Nomeadamente, as primeiras 4 colunas são "Timestamp", "Nome", "Email" e "Em que meses esperas estar disponível para participar?" e as últimas 4 colunas são "Outros", "Quanto tempo demoraste a preencher o formulário?", "Comentários adicionais" e "Contacto telefónico". 
-  * Entre estes extremos, encontram-se as colunas referentes aos cursos.
+* Obter os ficheiros com: `git clone https://github.com/Joao03Guilherme/instr-aloc`
+* Na pasta _Algoritmo\_Geral_ inserir os dados nos dois ficheiros Excel com a input para o algoritmo:
+  * `data.xlsx`: as primeiras 4 colunas são "Timestamp", "Nome", "Email", "Contacto telefónico" e "Em que meses esperas estar disponível para participar?", as restantes colunas são referentes aos cursos.
+  * `course_data.xlsx`: contém dados referentes às necessidades de staff para cada curso (staff mínimo e máximo). É composto por três linhas: "Curso", "Staff Mínimo" e "Staff Máximo".
+* Executar o ficheiro `instr_aloc_flow.py`.
