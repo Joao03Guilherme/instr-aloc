@@ -1,7 +1,7 @@
 # instr-aloc
 Algoritmo de alocação de instrutores a cursos. \
 Faz uso de algoritmos de fluxo máximo em redes. \
-A descrição da solução desenhada encontra-se [aqui](https://www.overleaf.com/read/cmsnhdyrpbrg).
+A descrição da solução desenhada encontra-se [aqui](https://drive.google.com/file/d/1QXTqFaD0hu9iJ6eI2EZQ1UUdWFIuJNfu/view?usp=sharing).
 
 ## Nota sobre o algoritmo 
 O respositório contém duas versões do algoritmo. 
