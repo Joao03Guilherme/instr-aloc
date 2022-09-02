@@ -1,6 +1,6 @@
-from network_flow_algorithm import FastMinCostNetworkFlowSolver
-import pandas as pd 
 import os
+import pandas as pd
+from network_flow_algorithm import FastMinCostNetworkFlowSolver
 
 INF = 999
 
@@ -102,7 +102,7 @@ def output_data(course_list, instr_list):
 
     for instructor in instr_list:
         if not instructor.allocated:
-            output_data.append(["Sem curso", instructor.name, instructor.email])
+            output_data.append(["Sem curso", instructor.email, "None"])
     
     df = pd.DataFrame(output_data)
     df.columns = ["Course", "Email", "Possible Months"]
@@ -110,7 +110,6 @@ def output_data(course_list, instr_list):
     
 def build_bipartite_graph(instructor_list, course_list, preferences, tight):
     """Returns a flow network with instructors and courses as vertices
-    
     Args:
         instructor_list (list): List of Instructor objects
         course_list (list): List of Course objects
