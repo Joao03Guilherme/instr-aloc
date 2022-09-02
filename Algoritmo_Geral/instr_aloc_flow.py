@@ -2,8 +2,6 @@ import os
 import pandas as pd
 from network_flow_algorithm import FastMinCostNetworkFlowSolver
 
-# TODO: REFACTOR CODE, CHANGE VARIABLE NAMES, SET OUTPUT TO CSV
-
 INF = 999
 
 STAFF_FORM_FILENAME ="data.csv"
