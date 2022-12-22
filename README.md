@@ -11,6 +11,6 @@ O respositório contém duas versões do algoritmo.
 ## Como executar?
 * Obter os ficheiros com: `git clone https://github.com/Joao03Guilherme/instr-aloc`
 * Na pasta _Algoritmo\_Geral_ inserir os dados nos dois ficheiros csv com a input para o algoritmo:
-  * `data.csv`: as colunas são "email", "interest", "name" e "possible_months"
+  * `data.csv`: as colunas são "email", "interest", "name" e "possible_months" (esta última pode ser omitida)
   * `course_data.csv`: contém dados referentes às necessidades de staff para cada curso (staff mínimo e máximo). É composto por três colunas: "course", "min_staff" e "max_staff".
 * Executar o ficheiro `instr_aloc_flow.py`.
