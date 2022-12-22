@@ -7,6 +7,7 @@ INF = 999
 STAFF_FORM_FILENAME ="data.csv"
 OUTPUT_FILENAME = "output.csv"
 COURSE_DATA_FILENAME = "course_data.csv"
+CONSIDERS_POSSIBLE_MONTHS = True
 
 # Changing python running directory
 abspath = os.path.abspath(__file__)
@@ -62,17 +63,24 @@ def import_data():
         interests (dict): maps instructor email to list of interests in courses
         staff_per_course (dict): maps course_name to staff requirements (min and max)
     """
+    global CONSIDERS_POSSIBLE_MONTHS
+    
     df_staff_form = pd.read_csv(STAFF_FORM_FILENAME) 
     df_course_data = pd.read_csv(COURSE_DATA_FILENAME)
 
     instructor_emails = set(df_staff_form["email"].values)
     open_course_names = set(df_staff_form["name"].values)
     interests = {email : [] for email in instructor_emails}
-    for email, interest, name, possible_months in df_staff_form.values:
-        possible_months_list = possible_months.strip("}{").split(",")
-        biased_interest = 10 ** int(interest) + len(possible_months_list) # Give more value to preference that has more months
-        interests[email].append((name, biased_interest, possible_months_list))
-    
+
+    if "possible_months" in df_staff_form:
+        for email, interest, name, possible_months in df_staff_form.values:
+            possible_months_list = possible_months.strip("}{").split(",")
+            biased_interest = 10 ** int(interest) + len(possible_months_list) # Give more value to preference that has more months
+            interests[email].append((name, biased_interest, possible_months_list))
+    else:
+        CONSIDERS_POSSIBLE_MONTHS = False
+        for email, interest, name in df_staff_form.values:
+            interests[email].append((name, interest, []))
 
     course_names = df_course_data["course"].values
     course_min_staff = df_course_data["min_staff"].values.astype(int)
@@ -97,15 +105,23 @@ def output_data(course_list, instr_list):
     output_data = []
     for course in course_list:
         if course.can_open:
-            for instructor in course.allocated_instructors:
-                output_data.append([course.name, instructor.email, instructor.possible_months])
+            if CONSIDERS_POSSIBLE_MONTHS:
+                for instructor in course.allocated_instructors:
+                    output_data.append([course.name, instructor.email, instructor.possible_months])
+            else:
+                for instructor in course.allocated_instructors:
+                    output_data.append([course.name, instructor.email])
 
     for instructor in instr_list:
         if not instructor.allocated:
             output_data.append(["Sem curso", instructor.email, "None"])
     
     df = pd.DataFrame(output_data)
-    df.columns = ["Course", "Email", "Possible Months"]
+    if CONSIDERS_POSSIBLE_MONTHS:
+        df.columns = ["Course", "Email", "Possible Months"]
+    else:
+        df.columns = ["Course", "Email"]
+
     df.to_csv(OUTPUT_FILENAME, sep=",", index=False)
     
 def build_bipartite_graph(instructor_list, course_list, preferences, tight):
@@ -156,7 +172,7 @@ def run_solver(instructor_list, course_list, preferences, tight):
                 course = get_course_or_instructor_by_id(course_list, edge.end)
                 for preference in preferences[instructor.email]:
                     if preference.course == course:
-                        instructor.allocated = True
+                        instructor.allocated = True 
                         instructor.course = course 
                         instructor.possible_months = preference.possible_months
                         course.allocated_instructors.append(instructor)
