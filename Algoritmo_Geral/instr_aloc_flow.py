@@ -117,9 +117,11 @@ def output_data(course_list, instr_list):
             output_data.append(["Sem curso", instructor.email, "None"])
     
     df = pd.DataFrame(output_data)
+    
     if CONSIDERS_POSSIBLE_MONTHS:
         df.columns = ["Course", "Email", "Possible Months"]
     else:
+        df = df.iloc[:,:-1]
         df.columns = ["Course", "Email"]
 
     df.to_csv(OUTPUT_FILENAME, sep=",", index=False)
