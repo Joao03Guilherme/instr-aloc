@@ -1,1 +1,42 @@
-"course","min_staff","max_staff"
+course,min_staff,max_staff
+Bootcamp de Computação e Combinatória,100,100
+Programação,12,60
+Algoritmos I,100,100
+Algoritmos II,100,100
+Astrofísica,100,100
+Lógica e Demonstrações,100,100
+Microbiologia,100,100
+Termodinâmica,1,10
+Biologia Molecular e Celular,1,40
+Medicina,100,100
+Bootcamp de Física,100,100
+Relatividade,100,100
+Relatividade II,100,100
+Funções e Equações,100,100
+Bootcamp de Algoritmos,100,100
+Cálculo Diferencial,100,100
+Missões Espaciais,100,100
+Matemática Cientistas e Engenheiros I,100,100
+Física I,100,100
+Informática I,100,100
+Álgebra Linear,1,50
+Neurociência,100,100
+Redes Neuronais,100,100
+Cálculo Integral,100,100
+Análise de Investimentos e Mercados,100,100
+Probabilidades,100,100
+Análise Real,100,100
+Machine Learning,100,100
+Matemática Avançada,100,100
+Inteligência Artificial,100,100
+Programação de Jogos,100,100
+Matemática Olímpica,100,100
+Engenharia Genética e Bioprocessos,100,100
+Genética,100,100
+Química,100,100
+Modelação 3D,1,25
+Arquitetura de Computadores I,100,100
+Circuitos Elétricos e Eletrónicos,100,100
+Arquitetura de Computadores II,100,100
+Química Avançada,100,100
+Web I,1,25
