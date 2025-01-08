@@ -1,4 +1,22 @@
-# instr-aloc
+# Instr-Aloc [EN]
+Instructor-to-course allocation algorithm.  
+Uses maximum flow algorithms in networks.  
+The description of the designed solution can be found [here](https://drive.google.com/file/d/1QXTqFaD0hu9iJ6eI2EZQ1UUdWFIuJNfu/view?usp=sharing) (Portuguese).
+
+## Note on the Algorithm
+The repository contains two versions of the algorithm:  
+- The *restricted* version does not consider a preference scale; it only considers whether an instructor can or cannot be allocated to a course. This version is based on [this implementation](https://github.com/Joao03Guilherme/Network-Flow-Algorithms/blob/master/EdmondsKarp.py) of the *Edmonds-Karp* algorithm.  
+- The *general* version considers a preference scale, accounting for the possibility that an instructor *prefers* one course over another. This version is based on [this implementation](https://github.com/Joao03Guilherme/Network-Flow-Algorithms/blob/master/MinCostFlow2.py) of a minimum-cost maximum-flow algorithm.  
+
+## How to Run?
+1. Obtain the files with: `git clone https://github.com/Joao03Guilherme/instr-aloc`.  
+2. In the _Algoritmo\_Geral_ folder, input the data into the two CSV files for the algorithm:  
+   - `data.csv`: the columns are "email," "interest," "name," and "possible_months" (the latter can be omitted).  
+   - `course_data.csv`: contains data regarding the staffing needs for each course (minimum and maximum staff). It consists of three columns: "course," "min_staff," and "max_staff."  
+3. Run the `instr_aloc_flow.py` file.  
+
+
+# Instr-Aloc [PT]
 Algoritmo de alocação de instrutores a cursos. \
 Faz uso de algoritmos de fluxo máximo em redes. \
 A descrição da solução desenhada encontra-se [aqui](https://drive.google.com/file/d/1QXTqFaD0hu9iJ6eI2EZQ1UUdWFIuJNfu/view?usp=sharing).
@@ -14,3 +32,4 @@ O respositório contém duas versões do algoritmo.
   * `data.csv`: as colunas são "email", "interest", "name" e "possible_months" (esta última pode ser omitida)
   * `course_data.csv`: contém dados referentes às necessidades de staff para cada curso (staff mínimo e máximo). É composto por três colunas: "course", "min_staff" e "max_staff".
 * Executar o ficheiro `instr_aloc_flow.py`.
+
